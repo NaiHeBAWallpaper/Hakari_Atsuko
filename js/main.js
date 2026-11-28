@@ -43,7 +43,8 @@ const subtitleLocales = {
 	Chinese: 'zh-Hans',
 	TraditionalChinese: 'zh-Hant',
 	Japanese: 'ja',
-	Korean: 'ko'
+	Korean: 'ko',
+	Thai: 'th'
 };
 
 const CHARACTER = 'Atsuko';
@@ -66,8 +67,8 @@ const AUDIO_DETAIL = [
 				"You...brought them for me?"
 			],
 			Chinese: [
-				"这朵花，难道…",
-				"……是你拿来的。"
+				"这朵花，难道说……",
+				"是为了我……"
 			],
 			TraditionalChinese: [
 				"這束花，難道是……",
@@ -76,7 +77,8 @@ const AUDIO_DETAIL = [
 			Korean: [
 				"이 꽃, 설마……",
 				"……가져와 주었구나."
-			]
+			],
+			Thai: ["ดอกไม้นี่... หรือว่า...","คุณครูซื้อมาให้ฉันงั้นเหรอ?"]
 		}
 	},
 	{
@@ -90,8 +92,8 @@ const AUDIO_DETAIL = [
 				"...I see."
 			],
 			Chinese: [
-				"为了我吗……？",
-				"……这样啊。"
+				"带过来的吗……？",
+				"……原来如此。"
 			],
 			TraditionalChinese: [
 				"是為了我……？",
@@ -100,7 +102,8 @@ const AUDIO_DETAIL = [
 			Korean: [
 				"날 위해서…?",
 				"……그렇구나."
-			]
+			],
+			Thai: ["เอามาปลูกเพื่อฉันเหรอ...?","อย่างนี้นี่เอง..."]
 		}
 	},
 	{
@@ -109,17 +112,18 @@ const AUDIO_DETAIL = [
 				"……大切にするね、ずっと。"
 			],
 			English: [
-				"...I'll treasure it."
+				"I'll treasure them."
 			],
 			Chinese: [
-				"……我会好好珍惜的。一直。"
+				"我会好好珍惜的。"
 			],
 			TraditionalChinese: [
 				"……我會珍惜的，直到永遠。"
 			],
 			Korean: [
 				"소중히 간직할게."
-			]
+			],
+			Thai: ["ฉันจะรักษาไว้อย่างดีเลย"]
 		}
 	},
 	{
@@ -131,14 +135,15 @@ const AUDIO_DETAIL = [
 				"...I'm so happy. Thank you."
 			],
 			Chinese: [
-				"……非常，高兴。谢谢。"
+				"……好开心啊，谢谢你。"
 			],
 			TraditionalChinese: [
 				"……真的好開心。謝謝。"
 			],
 			Korean: [
 				"……굉장히 기뻐. 고마워."
-			]
+			],
+			Thai: ["ฉันดีใจมากๆ เลย..."]
 		}
 	}
 ];
@@ -250,7 +255,7 @@ function playVoiceline() {
 			track.play().catch(finish);
 
 			if (dialogBox) {
-				textbox.textContent = dialog[window.selectedLanguage][index];
+				textbox.textContent = getSubtitleText(dialog, window.selectedLanguage, index);
 				textbox.style.opacity = 1;
 			}
 		},
@@ -420,6 +425,16 @@ function setMouse(event) {
 	return { x: ax - canvas.width * positionX, y: ay - canvas.height * positionY };
 }
 
+function getSubtitleText(dialog, language, index) {
+	let text = dialog?.[language]?.[index];
+	if (text == null && language === 'Thai') {
+		language = 'English';
+		text = dialog?.[language]?.[index];
+	}
+	textbox.lang = subtitleLocales[language];
+	return text ?? "";
+}
+
 function updateSubtitleLanguage() {
 	let language = subtitleLanguagePreference;
 	if (language === 'auto') {
@@ -433,6 +448,8 @@ function updateSubtitleLanguage() {
 			language = 'Japanese';
 		} else if (primary === 'ko' || primary === 'korean' || primary === 'koreana') {
 			language = 'Korean';
+		} else if (primary === 'th' || primary === 'thai') {
+			language = 'Thai';
 		} else {
 			language = 'English';
 		}
@@ -442,7 +459,7 @@ function updateSubtitleLanguage() {
 	window.selectedLanguage = language;
 	textbox.lang = subtitleLocales[language];
 	const clip = currentTracks.at(-1);
-	if (dialogBox && clip) textbox.textContent = clip.dialog[language][clip.index];
+	if (dialogBox && clip) textbox.textContent = getSubtitleText(clip.dialog, language, clip.index);
 }
 
 function init() {
